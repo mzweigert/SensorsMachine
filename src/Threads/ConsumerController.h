@@ -1,14 +1,3 @@
-/*
- 	ConsumerController.h - Controlls a list of consumers with different timings
-	Basicaly, what it does is to keep track of current consumers and run when
-	necessary.
-	ConsumerController is an extended class of Consumer, because of that,
-	it allows you to add a ConsumerController inside another ConsumerController...
-	For instructions, go to https://github.com/ivanseidel/ArduinoConsumer
-	Created by Ivan Seidel Gomes, March, 2013.
-	Released into the public domain.
-*/
-
 #ifndef ConsumerController_h
 #define ConsumerController_h
 
@@ -16,7 +5,7 @@
 #include "inttypes.h"
 #include "../LinkedList/LinkedList.h"
 
-#define MAX_consumers		15
+#define MAX_consumers    15
 
 template <typename Arg>
 class ConsumerController: public Consumer<Arg> {
@@ -50,6 +39,7 @@ class ConsumerController: public Consumer<Arg> {
 
     void stop(int _id);
 };
+
 
 template <typename Arg>
 ConsumerController<Arg>::ConsumerController(long _interval): Consumer<Arg>((int)this) {

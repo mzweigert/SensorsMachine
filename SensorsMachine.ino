@@ -1,8 +1,8 @@
-#include "WiFiManager.h"
-#include "WebSocketsServerRunner.h"
-#include "SensorsState.h"
-#include "LedRGBThread.h"
-#include "DisplayThread.h"
+#include "src/WiFiManagement/WiFiConnector.h"
+#include "src/WebSockets/WebSocketsServerRunner.h"
+#include "src/SensorsState/SensorsState.h"
+#include "src/Threads/LedRGBThread.h"
+#include "src/Threads/DisplayThread.h"
 
 SensorsState *sensorsState;
 WebSocketsServerRunner *webSocketsServerRunner;
@@ -15,7 +15,7 @@ void setup() {
   digitalWrite(LED_BUILTIN, HIGH);
 
   sensorsState = new SensorsState();
-  boolean connected = WiFiManager::connectToWiFi();
+  boolean connected = WiFiConnector::connectToWiFi();
   if (connected) {
     webSocketsServerRunner = new WebSocketsServerRunner(8080, "sensors", *sensorsState);
     webSocketsServerRunner->begin();
@@ -29,7 +29,7 @@ void setup() {
 void loop() {
   ledRGBThread->loop();
   displayThread->loop();
-  if (WiFiManager::isConnected() && webSocketsServerRunner != NULL) {
+  if (WiFiConnector::isConnected() && webSocketsServerRunner != NULL) {
     webSocketsServerRunner->loop();
   }
 }

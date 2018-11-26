@@ -1,16 +1,3 @@
-/*
- 	Consumer.h - An runnable object
-
-	Consumer is responsable for holding the "action" for something,
-	also, it responds if it "should" or "should not" run, based on
-	the current time;
-
-	For instructions, go to https://github.com/ivanseidel/ArduinoConsumer
-
-	Created by Ivan Seidel Gomes, March, 2013.
-	Released into the public domain.
-*/
-
 #ifndef Consumer_h
 #define Consumer_h
 
@@ -50,10 +37,10 @@ class Consumer {
     	NOTE: This MUST be called if extending
     	this class and implementing run() method
     */
-    virtual void runned(long time);
+    void runned(long time);
 
     // Default is to mark it runned "now"
-    virtual void runned() {
+    void runned() {
       runned(millis());
     }
 
@@ -77,21 +64,24 @@ class Consumer {
     Consumer(int _id, _callbackType _callback, Arg _arg, long _interval = 0);
 
     // Set the desired interval for calls, and update _cached_next_run
-    virtual void setInterval(long _interval);
+    void setInterval(long _interval);
 
     // Return if the Consumer should be runned or not
-    virtual bool shouldRun(long time);
+    bool shouldRun(long time);
 
     // Default is to check whether it should run "now"
-    virtual bool shouldRun() {
+    bool shouldRun() {
       return shouldRun(millis());
     }
 
     // Callback set
     void onRun(_callbackType callback);
     // Runs Consumer
-    virtual void run();
+    void run();
+
+    void loop();
 };
+
 
 template <typename Arg>
 Consumer<Arg>::Consumer(int _id, long _interval) {
@@ -171,5 +161,13 @@ void Consumer<Arg>::run() {
   // Update last_run and _cached_next_run
   runned();
 }
+
+template <typename Arg>
+void Consumer<Arg>::loop() {
+  if (this->shouldRun()) {
+    this->run();
+  }
+}
+
 
 #endif
