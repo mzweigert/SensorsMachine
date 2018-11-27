@@ -13,15 +13,17 @@ class DisplayThread : public Thread {
           _lastSoilMoisture,
           _lastWiFiStatus;
 
+    void clearLine(int yOffset);
+    
     void drawString(uint8_t x, uint8_t y, String str);
     
     void initDisplay();
-    
+
     float checkIfStateChanged(float* last, float current, bool* anyStateChanged);
 
   public:
     void displaySensorsInfo();
-    
+
     DisplayThread(long interval, SensorsState sensorsState);
 
 };

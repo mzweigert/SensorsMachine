@@ -1,8 +1,12 @@
 #include "WiFiConnector.h"
-#include <ESP8266WiFi.h>
 
-const char* ssid = "UPC87275D2";
-const char* password = "zBpew5zpGumj";
+#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
+
+//needed for library
+#include <DNSServer.h>
+#include <ESP8266WebServer.h>
+#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
+
 
 bool WiFiConnector::isConnected() {
   return WiFi.status() == WL_CONNECTED;
@@ -10,23 +14,8 @@ bool WiFiConnector::isConnected() {
 
 bool WiFiConnector::connectToWiFi() {
 
-  WiFi.begin(ssid, password);
+  WiFiManager wifiManager;
 
-  Serial.print("connecting");
+  return wifiManager.autoConnect("AutoConnectAP");
 
-  int triesNumber = 0;
-
-  while (!isConnected()) {
-    if (triesNumber >= 10) {
-      Serial.println("Connection failed...");
-      return false;
-    }
-    Serial.print(".");
-    delay(500);
-    triesNumber++;
-  }
-
-  Serial.println(WiFi.localIP());
-  Serial.println("connected...");
-  return true;
 }
