@@ -6,6 +6,7 @@ class WiFiConnector {
   public:
     static bool isConnected();
     static bool connectToWiFi();
+    static void loop();
 };
 
 #endif

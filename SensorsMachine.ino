@@ -9,6 +9,12 @@ WebSocketsServerRunner *webSocketsServerRunner;
 LedRGBThread *ledRGBThread;
 DisplayThread *displayThread;
 
+void initWebSocketServerRunner() {
+  webSocketsServerRunner = new WebSocketsServerRunner(8080, "sensors", *sensorsState);
+  webSocketsServerRunner->begin();
+  digitalWrite(LED_BUILTIN, LOW);
+}
+
 void setup() {
   Serial.begin(9600);
   pinMode(LED_BUILTIN, OUTPUT);
@@ -17,9 +23,7 @@ void setup() {
   sensorsState = new SensorsState();
   boolean connected = WiFiConnector::connectToWiFi();
   if (connected) {
-    webSocketsServerRunner = new WebSocketsServerRunner(8080, "sensors", *sensorsState);
-    webSocketsServerRunner->begin();
-    digitalWrite(LED_BUILTIN, LOW);
+    initWebSocketServerRunner();
   }
   ledRGBThread = new LedRGBThread(1000, *sensorsState);
   displayThread = new DisplayThread(1000, *sensorsState);
@@ -29,7 +33,11 @@ void setup() {
 void loop() {
   ledRGBThread->loop();
   displayThread->loop();
-  if (WiFiConnector::isConnected() && webSocketsServerRunner != NULL) {
+  WiFiConnector::loop();
+  if (WiFiConnector::isConnected()) {
+    if (webSocketsServerRunner == NULL) {
+      initWebSocketServerRunner();
+    }
     webSocketsServerRunner->loop();
   }
 }

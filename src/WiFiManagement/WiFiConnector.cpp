@@ -1,21 +1,50 @@
-#include "WiFiConnector.h"
-
-#include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
-
-//needed for library
+#include <FS.h>
+#include <ESP8266WiFi.h>
 #include <DNSServer.h>
-#include <ESP8266WebServer.h>
-#include <WiFiManager.h>         //https://github.com/tzapu/WiFiManager
 
+#include "WiFiConnector.h"
+#include "../SPIFFSReadServer/SPIFFSReadServer.h"
+#include "PersWiFiManager.h"
+
+#define DEBUG_PRINT(x) Serial.println(x)
+#define DEVICE_NAME "ESP8266 DEVICE"
+
+SPIFFSReadServer server(80);
+DNSServer dnsServer;
+PersWiFiManager persWM(server, dnsServer);
 
 bool WiFiConnector::isConnected() {
-  return WiFi.status() == WL_CONNECTED;
+  return WiFi.isConnected();
 }
 
 bool WiFiConnector::connectToWiFi() {
 
-  WiFiManager wifiManager;
+  persWM.onConnect([]() {
+    DEBUG_PRINT("wifi connected");
+    DEBUG_PRINT(WiFi.localIP());
+  });
+  //...or AP mode is started
+  persWM.onAp([]() {
+    DEBUG_PRINT("AP MODE");
+    DEBUG_PRINT(persWM.getApSsid());
+  });
 
-  return wifiManager.autoConnect("AutoConnectAP");
 
+  SPIFFS.begin();
+  //sets network name for AP mode
+  persWM.setApCredentials(DEVICE_NAME);
+
+  //make connecting/disconnecting non-blocking
+  persWM.setConnectNonBlock(true);
+
+  server.begin();
+  return persWM.begin();
+}
+
+void WiFiConnector::loop() {
+  //in non-blocking mode, handleWiFi must be called in the main loop
+  persWM.handleWiFi();
+
+  dnsServer.processNextRequest();
+  server.handleClient();
 }

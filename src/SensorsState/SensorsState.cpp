@@ -20,17 +20,18 @@ SensorsState::SensorsState() {
 float SensorsState::readTemperature() {
   float temperature = dht.readTemperature();
   int repeated = 10;
-  while (temperature != temperature && repeated > 0) {
+  while (temperature != temperature) {
     temperature = dht.readTemperature();
+     yield();
   }
   return temperature;
 }
 
 float SensorsState::readHumidity() {
   float humidity = dht.readHumidity();
-  int repeated = 10;
-  while (humidity != humidity && repeated > 0) {
+  while (humidity != humidity) {
     humidity = dht.readHumidity();
+    yield();
   }
   return humidity;
 }

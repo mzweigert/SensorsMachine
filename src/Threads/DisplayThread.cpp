@@ -1,6 +1,5 @@
 #include "DisplayThread.h"
 
-
 #include <Wire.h>
 #include <SPI.h>
 #include <ESP8266WiFi.h>
@@ -8,7 +7,7 @@
 #include "../Adafruit-GFX/Adafruit_GFX.h"
 #include "../Adafruit_SSD1306/Adafruit_SSD1306.h"
 
-#define OLED_RESET D5
+#define D5 14
 /* Object named display, of the class Adafruit_SSD1306 */
 Adafruit_SSD1306 display(D5);
 
