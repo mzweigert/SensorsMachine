@@ -40,7 +40,7 @@ void DisplayThread::initDisplay() {
   drawString(6, 55, (String) "WiFi Connected: " + (WiFi.status() == WL_CONNECTED ? "Yes" : "No"));
 }
 
-float DisplayThread::checkIfStateChanged(float* last, float current, bool* anyStateChanged) {
+bool DisplayThread::checkIfStateChanged(int* last, int current, bool* anyStateChanged) {
   if (*last != current) {
     *last = current;
     *anyStateChanged = true;
@@ -55,13 +55,16 @@ void DisplayThread::displaySensorsInfo() {
   bool temperatureChanged = checkIfStateChanged(&(DisplayThread::_lastTemperature), _sensorsState.readTemperature(), &anyStateChanged);
   if (temperatureChanged)  drawString(6, 10, (String) "Temperature: " + this->_lastTemperature);
 
-  float humidityChanged = checkIfStateChanged(&(DisplayThread::_lastHumidity), _sensorsState.readHumidity(), &anyStateChanged);
+  bool humidityChanged = checkIfStateChanged(&(DisplayThread::_lastHumidity), _sensorsState.readHumidity(), &anyStateChanged);
   if (humidityChanged) drawString(6, 25, (String) "Humidity: " + this->_lastHumidity);
 
-  float soilMoistureChanged = checkIfStateChanged(&(DisplayThread::_lastSoilMoisture), _sensorsState.readSoilMoisture(), &anyStateChanged);
-  if (soilMoistureChanged)  drawString(6, 40, (String) "Soil moisture: " + this->_lastSoilMoisture);
+  bool soilMoistureChanged = checkIfStateChanged(&(DisplayThread::_lastSoilMoisture), _sensorsState.readSoilMoisture(), &anyStateChanged);
+  if (soilMoistureChanged && this->_lastSoilMoisture > 0) {
+    drawString(6, 40, (String) "Soil moisture: " + this->_lastSoilMoisture);
+    this->_ledRGBManager.setLightBySoilMoisture(this->_lastSoilMoisture);
+  }
 
-  float wifiStatusChanged = checkIfStateChanged(&(DisplayThread::_lastWiFiStatus), WiFi.status() == WL_CONNECTED, &anyStateChanged);
+  bool wifiStatusChanged = checkIfStateChanged(&(DisplayThread::_lastWiFiStatus), WiFi.status() == WL_CONNECTED, &anyStateChanged);
   if (wifiStatusChanged) drawString(6, 55, (String) "WiFi Connected: " + (this->_lastWiFiStatus ? "Yes" : "No"));
 
   if (anyStateChanged) {
@@ -69,8 +72,9 @@ void DisplayThread::displaySensorsInfo() {
   }
 }
 
-DisplayThread::DisplayThread(long interval, SensorsState sensorsState = SensorsState()) : Thread(-100, interval) {
+DisplayThread::DisplayThread(long interval, SensorsState sensorsState) : Thread(-100, interval) {
   _sensorsState = sensorsState;
+  _ledRGBManager = LedRGBManager();
   initDisplay();
   const auto thread = std::bind(&DisplayThread::displaySensorsInfo, this);
   Thread::onRun(thread);

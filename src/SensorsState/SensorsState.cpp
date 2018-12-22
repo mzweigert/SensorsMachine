@@ -6,28 +6,33 @@
 
 #include <inttypes.h>
 #include "SensorsState.h"
-#include "../DHT/DHT.h"
+#include "DHT.h"
+#include "RCSwitch.h"
 
 #define MAX_ANALOG_VAL 1024
 #define DHT11_PIN 2
 #define DHTTYPE DHT11
+#define RECIVIER_DATA_PIN 0
+
 DHT dht(DHT11_PIN, DHTTYPE);
+RCSwitch receiver = RCSwitch();
 
 SensorsState::SensorsState() {
   dht.begin();
+  receiver.enableReceive(RECIVIER_DATA_PIN);
 }
 
-float SensorsState::readTemperature() {
+int SensorsState::readTemperature() {
   float temperature = dht.readTemperature();
   int repeated = 10;
   while (temperature != temperature) {
     temperature = dht.readTemperature();
-     yield();
+    yield();
   }
   return temperature;
 }
 
-float SensorsState::readHumidity() {
+int SensorsState::readHumidity() {
   float humidity = dht.readHumidity();
   while (humidity != humidity) {
     humidity = dht.readHumidity();
@@ -36,8 +41,13 @@ float SensorsState::readHumidity() {
   return humidity;
 }
 
-float SensorsState::readSoilMoisture() {
-  int soilMoisture = ((analogRead(A0) * -1 + MAX_ANALOG_VAL) * 125) / MAX_ANALOG_VAL;
+int SensorsState::readSoilMoisture() {
+   int soilMoisture = 0;
+   if (receiver.available()) {
+    soilMoisture = receiver.getReceivedValue();
+    receiver.resetAvailable();
+    yield();
+  }
   return soilMoisture;
 }
 

@@ -12,11 +12,11 @@ class SensorsState {
   
     SensorsState();
     
-    float readTemperature();
+    int readTemperature();
     
-    float readHumidity();
+    int readHumidity();
     
-    float readSoilMoisture();
+    int readSoilMoisture();
     
     String readAsJSON();
     

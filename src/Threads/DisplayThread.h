@@ -2,16 +2,18 @@
 #define DisplayThread_h
 
 #include "../SensorsState/SensorsState.h"
+#include "../Led-RGB-Manager/LedRGBManager.h"
 #include "Thread.h"
 
 class DisplayThread : public Thread {
 
   private:
     SensorsState _sensorsState;
-    float _lastHumidity,
-          _lastTemperature,
-          _lastSoilMoisture,
-          _lastWiFiStatus;
+    LedRGBManager _ledRGBManager;
+    int _lastHumidity,
+        _lastTemperature,
+        _lastSoilMoisture,
+        _lastWiFiStatus;
 
     void clearLine(int yOffset);
     
@@ -19,12 +21,12 @@ class DisplayThread : public Thread {
     
     void initDisplay();
 
-    float checkIfStateChanged(float* last, float current, bool* anyStateChanged);
+    bool checkIfStateChanged(int* last, int current, bool* anyStateChanged);
 
   public:
     void displaySensorsInfo();
 
-    DisplayThread(long interval, SensorsState sensorsState);
+    DisplayThread(long interval, SensorsState sensorsState = SensorsState());
 
 };
 

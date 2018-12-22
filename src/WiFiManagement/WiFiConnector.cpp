@@ -3,7 +3,7 @@
 #include <DNSServer.h>
 
 #include "WiFiConnector.h"
-#include "../SPIFFSReadServer/SPIFFSReadServer.h"
+#include "SPIFFSReadServer.h"
 #include "PersWiFiManager.h"
 
 #define DEBUG_PRINT(x) Serial.println(x)

@@ -1,12 +1,10 @@
 #include "src/WiFiManagement/WiFiConnector.h"
 #include "src/WebSockets/WebSocketsServerRunner.h"
 #include "src/SensorsState/SensorsState.h"
-#include "src/Threads/LedRGBThread.h"
 #include "src/Threads/DisplayThread.h"
 
 SensorsState *sensorsState;
 WebSocketsServerRunner *webSocketsServerRunner;
-LedRGBThread *ledRGBThread;
 DisplayThread *displayThread;
 
 void initWebSocketServerRunner() {
@@ -25,13 +23,11 @@ void setup() {
   if (connected) {
     initWebSocketServerRunner();
   }
-  ledRGBThread = new LedRGBThread(1000, *sensorsState);
   displayThread = new DisplayThread(1000, *sensorsState);
 
 }
 
 void loop() {
-  ledRGBThread->loop();
   displayThread->loop();
   WiFiConnector::loop();
   if (WiFiConnector::isConnected()) {
