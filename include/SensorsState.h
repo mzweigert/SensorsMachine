@@ -10,7 +10,8 @@
 #include <Wire.h>
 #include <inttypes.h>
 
-#include <vector>
+#include <map>
+#include <set>
 
 #define TX 1
 #define RX 3
@@ -19,18 +20,38 @@
 #define MIN_SENSOR_CAPACITY 290
 #define MAX_SENSOR_CAPACITY 530
 
+struct I2C {
+  short index;
+  uint8_t sda, scl;
+
+  // constructor
+  I2C(short index, uint8_t sda, uint8_t scl) : index(index), sda(sda), scl(scl) {}
+
+  // overload < operator to use a Node object as a key in a std::map
+  // It returns true if the current object appears before the specified object
+  bool operator<(const I2C &ob) const {
+    return index < ob.index ||
+           (index == ob.index && sda < ob.sda) ||
+           (index == ob.index && sda == ob.sda && scl < ob.scl);
+  }
+};
+
 class Sensor {
  private:
   short _id;
-  uint8_t *_sda, *_scl;
+  I2C _i2c;
   I2CSoilMoistureSensor _sensor;
 
  public:
-  Sensor(short _id, uint8_t *_sda, uint8_t *_scl);
+  Sensor(short _id, I2C _i2c);
   ~Sensor();
   short getId() {
     return _id;
   };
+
+  I2C getI2C() {
+    return _i2c;
+  }
 
   String readData();
   String readAsJSON();
@@ -38,18 +59,18 @@ class Sensor {
 
 class SensorsState {
  private:
-  static short _id_sequence;
-  short _addresses_size;
+  static byte _id_sequence;
+  byte _addresses_size;
+  std::map<byte, Sensor *> _sensors;
+
+  Sensor *findConnectedSensor(byte slot);
+  bool isConnectedToSlot(byte slot);
 
  public:
-  std::vector<Sensor> sensors = std::vector<Sensor>();
-
   SensorsState();
   ~SensorsState();
 
-  Sensor *connectNext();
-  bool isAllConnected();
-  bool isAnyConnected();
+  std::map<I2C, Sensor *> getConnections();
 
   String readAsJSON();
 };
