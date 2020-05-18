@@ -17,15 +17,11 @@ void MainThread::initSensorsInfo() {
 void MainThread::initWiFiConnection() {
   boolean connected = WiFiConnector::connectToWiFi();
   if (connected) {
-    initWebSocketServerRunner();
+    _webSocketsServerRunner = new WebSocketsServerRunner(WEB_SOCKET_SERVER_PORT, _sensorsState, WEB_SOCKET_SERVER_ORIGIN);
+    _sensorsMachineWebServer = new SensorsMachineWebServer(WEB_SERVER_PORT, _sensorsState);
+    digitalWrite(LED_BUILTIN, LOW);
   }
   _display->drawString(6, 50, (String) "WiFi Connected: " + (WiFiConnector::isConnected() ? "Yes" : "No"));
-}
-
-void MainThread::initWebSocketServerRunner() {
-  _webSocketsServerRunner = new WebSocketsServerRunner(8080, _sensorsState, "sensors");
-  _webSocketsServerRunner->begin();
-  digitalWrite(LED_BUILTIN, LOW);
 }
 
 void MainThread::refreshSensorsConnectionInfoOnDisplay() {
@@ -59,13 +55,18 @@ void MainThread::refreshSensorsStateInfoOnDisplay() {
   _previousConnections = connections;
 }
 
-void MainThread::refreshWebSocketServerRunner() {
+void MainThread::refreshServers() {
+  WiFiConnector::loop();
   if (WiFiConnector::isConnected()) {
-    WiFiConnector::loop();
     if (_webSocketsServerRunner == NULL) {
-      initWebSocketServerRunner();
+      _webSocketsServerRunner = new WebSocketsServerRunner(WEB_SOCKET_SERVER_PORT, _sensorsState, WEB_SOCKET_SERVER_ORIGIN);
+    }
+    if (_sensorsMachineWebServer == NULL) {
+      _sensorsMachineWebServer = new SensorsMachineWebServer(WEB_SERVER_PORT, _sensorsState);
+      digitalWrite(LED_BUILTIN, LOW);
     }
     _webSocketsServerRunner->loop();
+    _sensorsMachineWebServer->loop();
   }
   _display->drawString(6, 50, (String) "WiFi Connected: " + (WiFiConnector::isConnected() ? "Yes" : "No"));
 }
@@ -76,15 +77,17 @@ MainThread::MainThread() : Thread(0, 0) {
   initSensorsInfo();
   initWiFiConnection();
 
-  Thread *refreshSensorsConnection = new Thread(1, 1000, std::bind(&MainThread::refreshSensorsConnectionInfoOnDisplay, this));
+  Thread *refreshSensorsConnection = new Thread(1, REFRESH_SENSORS_CONNECTIONS_INTERVAL,
+                                                std::bind(&MainThread::refreshSensorsConnectionInfoOnDisplay, this));
   _threads.add(refreshSensorsConnection);
 
-  Thread *refreshSensorsInfo = new Thread(2, 120000, std::bind(&MainThread::refreshSensorsStateInfoOnDisplay, this));
+  Thread *refreshSensorsInfo = new Thread(2, REFRESH_SENSORS_INFO_INTERVAL,
+                                          std::bind(&MainThread::refreshSensorsStateInfoOnDisplay, this));
   _threads.add(refreshSensorsInfo);
 
-  Thread *refreshWebSocketServerRunner = new Thread(3, 60000, std::bind(&MainThread::refreshWebSocketServerRunner, this));
+  Thread *refreshWebSocketServerRunner = new Thread(3, 0, std::bind(&MainThread::refreshServers, this));
   _threads.add(refreshWebSocketServerRunner);
 
-  auto const run = std::bind(&ThreadController::run, &_threads);
+  auto const run = std::bind(&ThreadController::loop, &_threads);
   Thread::onRun(run);
 }

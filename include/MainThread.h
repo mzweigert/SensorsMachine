@@ -3,6 +3,7 @@
 #define MainThread_h
 
 #include "Display.h"
+#include "SensorsMachineWebServer.h"
 #include "SensorsState.h"
 #include "ThreadController.h"
 #include "WebSocketsServerRunner.h"
@@ -15,14 +16,15 @@ class MainThread : public Thread {
   SensorsState* _sensorsState;
   std::map<I2C, Sensor*> _previousConnections;
   WebSocketsServerRunner* _webSocketsServerRunner;
+  SensorsMachineWebServer* _sensorsMachineWebServer;
 
   void initSensorsInfo();
   void initWiFiConnection();
-  void initWebSocketServerRunner();
+  void initServers();
 
   void refreshSensorsConnectionInfoOnDisplay();
   void refreshSensorsStateInfoOnDisplay();
-  void refreshWebSocketServerRunner();
+  void refreshServers();
 
  public:
   MainThread();

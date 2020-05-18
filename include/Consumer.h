@@ -74,7 +74,7 @@ class Consumer {
   // Callback set
   void onRun(_callbackType callback);
   // Runs Consumer
-  void run();
+  void virtual run();
 
   void loop();
 };

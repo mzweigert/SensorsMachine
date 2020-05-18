@@ -13,15 +13,21 @@
 SPIFFSReadServer server(80);
 DNSServer dnsServer;
 PersWiFiManager persWM(server, dnsServer);
+bool wiFiConnected = false;
+bool canStopServers = false;
 
 bool WiFiConnector::isConnected() {
-  return WiFi.isConnected();
+  return wiFiConnected;
+}
+
+IPAddress getLocalIP() {
 }
 
 bool WiFiConnector::connectToWiFi() {
   persWM.onConnect([]() {
     DEBUG_PRINT("wifi connected");
     DEBUG_PRINT(WiFi.localIP());
+    wiFiConnected = canStopServers = true;
   });
   //...or AP mode is started
   persWM.onAp([]() {
@@ -42,8 +48,13 @@ bool WiFiConnector::connectToWiFi() {
 
 void WiFiConnector::loop() {
   //in non-blocking mode, handleWiFi must be called in the main loop
-  persWM.handleWiFi();
-
-  dnsServer.processNextRequest();
-  server.handleClient();
+  if (!wiFiConnected) {
+    persWM.handleWiFi();
+    dnsServer.processNextRequest();
+    server.handleClient();
+  } else if (canStopServers) {
+    dnsServer.stop();
+    server.stop();
+    canStopServers = false;
+  }
 }

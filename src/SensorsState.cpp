@@ -82,15 +82,15 @@ String SensorsState::readAsJSON() {
   String json = "[";
   int i = 0;
 
-  for (i = 0; i < this->_addresses_size; i++) {
-    if (_sensors.find(i) != _sensors.end()) {
-      Sensor* sensor = _sensors[i];
-      json += sensor->readAsJSON();
-      if (i != _addresses_size - 1) {
-        json += ", ";
-      }
+  for (auto const& _sensor : _sensors) {
+    Sensor* sensor = _sensor.second;
+    json += sensor->readAsJSON();
+    if (i != _sensors.size() - 1) {
+      json += ", ";
     }
+    i++;
   }
+
   json += "]";
   return json;
 }

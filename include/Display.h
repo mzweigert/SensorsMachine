@@ -4,6 +4,7 @@
 #include <ESP8266WiFi.h>
 #include <Wire.h>
 
+#include "Definitions.h"
 #include "SH1106.h"
 
 class Display {

@@ -17,7 +17,7 @@ class ThreadController : public Thread {
   ThreadController(long _interval = 0);
 
   // run() Method is overrided
-  void run();
+  void run() override;
 
   // Adds a thread in the first available slot (remove first)
   // Returns if the Thread could be added or not

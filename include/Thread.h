@@ -68,7 +68,7 @@ class Thread {
   // Callback set
   void onRun(_callbackType callback);
   // Runs Thread
-  void run();
+  virtual void run();
 
   void loop();
 };

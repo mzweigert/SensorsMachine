@@ -32,15 +32,16 @@ WebSocketsServerRunner::WebSocketsServerRunner(uint16_t port,
                                                SensorsState* sensorsState,
                                                String origin, String protocol)
     : WebSocketsServer(port, origin, protocol) {
-  _consumers = ConsumerController<uint8_t>();
+  _consumers = ConsumerController<uint8_t>(5000);
   _sensorsState = sensorsState;
   const auto event = std::bind(&WebSocketsServerRunner::webSocketEvent, this,
                                std::placeholders::_1, std::placeholders::_2,
                                std::placeholders::_3, std::placeholders::_4);
   WebSocketsServer::onEvent(event);
+  begin();
 }
 
 void WebSocketsServerRunner::loop() {
-  _consumers.run();
+  _consumers.loop();
   WebSocketsServer::loop();
 }

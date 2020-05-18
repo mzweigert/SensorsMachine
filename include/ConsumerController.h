@@ -18,7 +18,7 @@ class ConsumerController : public Consumer<Arg> {
   ConsumerController(long _interval = 0);
 
   // run() Method is overrided
-  void run();
+  void run() override;
 
   // Adds a Consumer in the first available slot (remove first)
   // Returns if the Consumer could be added or not
