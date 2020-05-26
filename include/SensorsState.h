@@ -12,9 +12,9 @@
 
 #include <map>
 #include <set>
+#include <unordered_map>
 
-#define TX 1
-#define RX 3
+#include "Definitions.h"
 
 #define SENSOR_ADDRESS 0x20
 #define MIN_SENSOR_CAPACITY 290
@@ -53,26 +53,25 @@ class Sensor {
     return _i2c;
   }
 
-  String readData();
+  byte readSoilMoisture();
   String readAsJSON();
 };
 
 class SensorsState {
  private:
   static byte _id_sequence;
-  byte _addresses_size;
   std::map<byte, Sensor *> _sensors;
 
   Sensor *findConnectedSensor(byte slot);
   bool isConnectedToSlot(byte slot);
 
  public:
-  SensorsState();
   ~SensorsState();
 
   std::map<I2C, Sensor *> getConnections();
 
   String readAsJSON();
+  signed char readSensorSoilMoisture(byte slot);
 };
 
 #endif

@@ -29,7 +29,7 @@ class ThreadController : public Thread {
   // Return the quantity of Threads
   int size(bool cached = true);
 
-  void stop(int _id);
+  void stop(int _id, bool remove = true);
 };
 
 #endif

@@ -4,12 +4,14 @@
 
 #include "ConsumerController.h"
 #include "SensorsState.h"
+#include "WaterPumpsController.h"
 #include "WebSocketsServer.h"
 
 class WebSocketsServerRunner : public WebSocketsServer {
  private:
   ConsumerController<uint8_t> _consumers = ConsumerController<uint8_t>();
   SensorsState* _sensorsState;
+  WaterPumpsController* _waterPumpsController;
 
   void notifyClient(uint8_t clientNumber);
 
@@ -18,6 +20,7 @@ class WebSocketsServerRunner : public WebSocketsServer {
 
  public:
   WebSocketsServerRunner(uint16_t port, SensorsState* sensorsState,
+                         WaterPumpsController* waterPumpsController,
                          String origin = "", String protocol = "arduino");
 
   void loop();

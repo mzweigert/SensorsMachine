@@ -20,9 +20,6 @@ bool WiFiConnector::isConnected() {
   return wiFiConnected;
 }
 
-IPAddress getLocalIP() {
-}
-
 bool WiFiConnector::connectToWiFi() {
   persWM.onConnect([]() {
     DEBUG_PRINT("wifi connected");

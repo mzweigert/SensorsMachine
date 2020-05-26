@@ -6,6 +6,7 @@
 #include "SensorsMachineWebServer.h"
 #include "SensorsState.h"
 #include "ThreadController.h"
+#include "WaterPumpsController.h"
 #include "WebSocketsServerRunner.h"
 #include "WiFiConnector.h"
 
@@ -14,6 +15,7 @@ class MainThread : public Thread {
   ThreadController _threads = ThreadController();
   Display* _display;
   SensorsState* _sensorsState;
+  WaterPumpsController* _pumpsController;
   std::map<I2C, Sensor*> _previousConnections;
   WebSocketsServerRunner* _webSocketsServerRunner;
   SensorsMachineWebServer* _sensorsMachineWebServer;
