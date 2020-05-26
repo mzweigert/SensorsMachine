@@ -1,10 +1,9 @@
 #include "ThreadController.h"
 
-ThreadController::ThreadController(long _interval) : Thread((int)this) {
+ThreadController::ThreadController(long _interval) : Thread((int)this, _interval) {
   cached_size = 0;
 
   clear();
-  this->setInterval(_interval);
 
 #ifdef USE_THREAD_NAMES
   // Overrides name
@@ -75,7 +74,7 @@ int ThreadController::size(bool cached) {
   return cached_size;
 }
 
-void ThreadController::stop(int _id) {
+void ThreadController::stop(int _id, bool remove) {
   if (threads.find(_id) == threads.end()) {
     return;
   }

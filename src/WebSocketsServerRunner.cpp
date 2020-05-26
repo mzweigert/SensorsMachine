@@ -1,8 +1,9 @@
 #include "WebSocketsServerRunner.h"
 
 void WebSocketsServerRunner::notifyClient(uint8_t clientNumber) {
-  String message = _sensorsState->readAsJSON();
-  Serial.println(message);
+  String sensors = _sensorsState->readAsJSON();
+  String pumps = _waterPumpsController->readAsJSON();
+  String message = "{ \"sensors\" : " + sensors + ", \"pumps\" : " + pumps + " }";
   bool sent = WebSocketsServer::sendTXT(clientNumber, message);
   if (sent) {
     Serial.println((String) "Consumer ran : " + clientNumber);
@@ -30,10 +31,12 @@ void WebSocketsServerRunner::webSocketEvent(uint8_t num, WStype_t type, uint8_t*
 
 WebSocketsServerRunner::WebSocketsServerRunner(uint16_t port,
                                                SensorsState* sensorsState,
+                                               WaterPumpsController* waterPumpsController,
                                                String origin, String protocol)
     : WebSocketsServer(port, origin, protocol) {
   _consumers = ConsumerController<uint8_t>(5000);
   _sensorsState = sensorsState;
+  _waterPumpsController = waterPumpsController;
   const auto event = std::bind(&WebSocketsServerRunner::webSocketEvent, this,
                                std::placeholders::_1, std::placeholders::_2,
                                std::placeholders::_3, std::placeholders::_4);
