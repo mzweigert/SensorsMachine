@@ -1,5 +1,14 @@
 #include "SensorsMachineWebServer.h"
 
+byte SensorsMachineWebServer::clampValue(byte value, byte min, byte max) {
+  if (value < min) {
+    return min;
+  } else if (value > max) {
+    return max;
+  }
+  return value;
+}
+
 void SensorsMachineWebServer::initEndpoints() {
   _server->on("/", [&]() {
     if (!_server->handleFileRead("/index.html"))
@@ -22,7 +31,11 @@ void SensorsMachineWebServer::initEndpoints() {
     StaticJsonDocument<200> doc;
     deserializeJson(doc, _server->arg("plain"));
     byte number = doc["number"];
-    ProcessStatus status = _pumpsController->runWateringProcess(number);
+    byte breakTime = doc["break_time"];
+    byte wateringTime = doc["watering_time"];
+    breakTime = clampValue(breakTime, 10, 30);
+    wateringTime = clampValue(wateringTime, 5, 20);
+    ProcessStatus status = _pumpsController->runWateringProcess(number, breakTime, wateringTime);
     _server->send(status == PUMP_HAS_RUNNED ? 200 : 400,
                   "application/json",
                   (String) "{ \"number\" : " + number + ", \"status\" : \"" + status + "\" }");

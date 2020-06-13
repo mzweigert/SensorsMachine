@@ -42,7 +42,7 @@ void WaterPumpsController::changePumpStateToIdle(byte number) {
   pump->timeToRun = 0L;
 }
 
-void WaterPumpsController::turnOnPump(byte number, int ms) {
+void WaterPumpsController::turnOnPump(byte number, unsigned long breakTimeMS, unsigned long wateringTimeMS) {
   if (_pumps.find(number) == _pumps.end()) {
     return;
   }
@@ -51,7 +51,8 @@ void WaterPumpsController::turnOnPump(byte number, int ms) {
   pump->startTime = millis();
   pump->stopTime = 0L;
   pump->state = WaterPumpState::RUNNED;
-  pump->timeToRun = ms;
+  pump->timeToWait = breakTimeMS;
+  pump->timeToRun = wateringTimeMS;
 }
 
 String WaterPumpsController::readAsJSON() {
@@ -68,7 +69,7 @@ String WaterPumpsController::readAsJSON() {
   return json;
 }
 
-ProcessStatus WaterPumpsController::runWateringProcess(byte number) {
+ProcessStatus WaterPumpsController::runWateringProcess(byte number, byte breakTimeSec, byte wateringTimeSec) {
   if (_pumps.find(number) == _pumps.end()) {
     return PUMP_NOT_EXISTS;
   } else if (_pumps[number]->state != WaterPumpState::IDLE) {
@@ -82,7 +83,7 @@ ProcessStatus WaterPumpsController::runWateringProcess(byte number) {
     return ALREADY_WATERED;
   } else {
     Serial.println((String) " Turn on pump: " + number);
-    turnOnPump(number, RUN_TIME);
+    turnOnPump(number, breakTimeSec * 1000, wateringTimeSec * 1000);
     return PUMP_HAS_RUNNED;
   }
 }
@@ -93,13 +94,13 @@ void WaterPumpsController::loop() {
     if (pump->state == WaterPumpState::RUNNED && millis() >= pump->startTime + pump->timeToRun) {
       Serial.println("Turn off pump: " + i);
       turnOffPump(i);
-    } else if (pump->state == WaterPumpState::WAITING && millis() >= pump->stopTime + WAIT_TIME) {
+    } else if (pump->state == WaterPumpState::WAITING && millis() >= pump->stopTime + pump->timeToWait) {
       Serial.println(" Waiting pump: " + i);
       signed char percent = _sensorsState->readSensorSoilMoisture(i);
 
       if (percent >= 0 && percent < 75) {
         Serial.println(" Turn on pump: " + i);
-        turnOnPump(i, RUN_TIME);
+        turnOnPump(i, pump->timeToWait, pump->timeToRun);
       } else {
         Serial.println(" Idle pump: " + i);
         changePumpStateToIdle(i);

@@ -9,9 +9,6 @@
 #include "SensorsState.h"
 #include "ThreadController.h"
 
-#define WAIT_TIME 10000
-#define RUN_TIME 5000
-
 enum ProcessStatus {
   PUMP_NOT_EXISTS,
   CORRESPONDING_SENSOR_IS_NOT_CONNECTED,
@@ -65,11 +62,11 @@ struct WaterPump {
   unsigned long startTime;
   unsigned long stopTime;
   int timeToRun;
+  int timeToWait;
+
   WaterPump(byte number) : number(number) {
     state = WaterPumpState::IDLE,
-    startTime = 0;
-    stopTime = 0;
-    timeToRun = 0;
+    startTime = stopTime = timeToRun = timeToWait = 0;
   };
   String readAsJSON() {
     return (String) "{ \"number\" : " + number + ", \"state\" : \"" + state.name() + "\" }";
@@ -82,13 +79,13 @@ class WaterPumpsController {
   SensorsState* _sensorsState;
 
   void sendCommand(byte number, byte powerCmd);
-  void turnOnPump(byte number, int ms);
+  void turnOnPump(byte number, unsigned long breakTimeMS, unsigned long wateringTimeMS);
   void turnOffPump(byte number);
   void changePumpStateToIdle(byte number);
 
  public:
   String readAsJSON();
-  ProcessStatus runWateringProcess(byte number);
+  ProcessStatus runWateringProcess(byte number, byte breakTimeSec, byte wateringTimeSec);
   void loop();
 
   WaterPumpsController(SensorsState* sensorsState);

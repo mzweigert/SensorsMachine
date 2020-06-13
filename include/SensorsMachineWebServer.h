@@ -17,6 +17,7 @@ class SensorsMachineWebServer {
   SensorsState* _sensorsState;
   WaterPumpsController* _pumpsController;
 
+  byte clampValue(byte value, byte min, byte max);
   void initEndpoints();
 
  public:
